@@ -15,6 +15,7 @@ export const firebase = defineNitroPreset({
   hooks: {
     async 'compiled' (ctx) {
       await writeRoutes(ctx)
+			await copyFiles(ctx)
     }
   }
 })
@@ -93,3 +94,15 @@ async function writeRoutes (nitro: Nitro) {
     )
   )
 }
+
+async function copyFiles (nitro: Nitro) {
+	const sourceBinary = resolve(nitro.options.rootDir, 'node_modules/.bin/firebase-functions')
+	const sourcePkg = resolve(nitro.options.rootDir, 'node_modules/firebase-functions')
+	const serverModules = resolve(nitro.options.output.serverDir, 'node_modules')
+	const serverBinaries = resolve(serverModules, '.bin')
+
+	await fse.mkdir(serverBinaries)
+	await fse.copy(sourcePkg, resolve(serverModules, 'firebase-functions'))
+	await fse.copy(sourceBinary, resolve(serverBinaries, 'firebase-functions'))
+}
+
